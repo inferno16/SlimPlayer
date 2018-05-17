@@ -1,5 +1,5 @@
 {
     "dependencies": {
-        "SlimSlidy": "git+https://github.com/inferno16/SlimSlidy.git"
+        "SlimSlidy": "inferno16/SlimSlidy"
     }
 }
