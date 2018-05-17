@@ -1,11 +1,14 @@
 {
     "private": true,
+    "name": "slim-player",
+    "version": "0.0.1",
+    "main": "slimplayer.js",
     "author": "Ivan Angelov",
     "repository": {
         "type": "git",
         "url": "https://github.com/inferno16/SlimPlayer.git"
     },
     "dependencies": {
-        "SlimSlidy": "https://github.com/inferno16/SlimSlidy.git"
+        "slim-slidy": "https://github.com/inferno16/SlimSlidy.git"
     }
 }
