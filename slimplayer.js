@@ -53,6 +53,8 @@ window.SlimPlayer = (function(){
         var parent = videoNode.parentNode;
         var playerWrapper = CreateElement("slimplayer-wrapper");
         playerWrapper.appendChild(videoNode);
+        playerWrapper.addEventListener('mouseover', ShowControlsHandler);
+        playerWrapper.addEventListener('mouseout', HideControlsHandler);
         parent.insertBefore(playerWrapper, nextSibling);
         var controls = CreateElement("controls");
         pe.ControlsWrapper = controls;
@@ -252,6 +254,7 @@ window.SlimPlayer = (function(){
         player.dispatchEvent(seekevt);
 
     }
+    
 
     function VolumeHandler(e) {
         var player = this.parentNode.parentNode.parentNode.previousElementSibling;
@@ -263,6 +266,16 @@ window.SlimPlayer = (function(){
             var player = this.parentNode.parentNode.parentNode.previousElementSibling;
             sessionStorage.setItem('volume', player.volume);
         }
+    }
+
+    function ShowControlsHandler() {
+        var controls = this.parentNode.getElementsByClassName('controls')[0];
+        controls.style = 'display: block;';
+    }
+
+    function HideControlsHandler() {
+        var controls = this.parentNode.getElementsByClassName('controls')[0];
+        controls.style = 'display: none;';
     }
 
     function GetPlayerFromElement(elem) {

@@ -30,5 +30,4 @@ Example:
 Notes
 -----
 
-* A CSS style is not included but I'll probably do it in a later commit
 * There are a lot of bugs and missing features, but I'm in a hurry and at this point the essentials are enough.

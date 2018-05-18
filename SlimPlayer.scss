@@ -1,0 +1,100 @@
+// Variables
+$font-family: Helvetica, sans-serif;
+$font-size: 1vw;
+
+@mixin vendor-prefix($property, $value) {
+    @each $vendor in ('-webkit-', '-moz-', '-ms-', '-o-', '') {
+        #{$vendor}#{$property}: #{$value};
+    }
+}
+
+@mixin fallback($property, $value, $fallback) {
+    #{$property}: $fallback;
+    #{$property}: $value;
+}
+
+// https://stackoverflow.com/a/33221185/4379695
+@mixin vertical-align($align, $fs: $font-size) {
+    &:before {
+        content: "";
+        display: inline-block;
+        height: 100%;
+        vertical-align: $align;
+        // you can add font-size 0 here and restore in the children to prevent
+        // the inline-block white-space to mess the width of your elements
+        @include fallback('font-size', $fs, 1em);
+    }
+    & > * {
+        vertical-align: $align;
+        // although you need to know the font-size, because "inherit" is 0
+        @include fallback('font-size', $fs, 1em);
+    }
+}
+
+.slimplayer-wrapper {
+    @include vendor-prefix('user-select', 'none');
+    @include fallback('font-size', $font-size, 1em);
+    font-family: $font-family;
+    width: 100%;
+    height: 100%;
+    video {
+        width: 100%;
+        height: 100%;
+        display: block;
+        padding: 0;
+        margin: 0;
+    }
+    .controls {
+        padding: 0;
+        margin: 0;
+        background-color: rgba(61, 61, 61, 0.4); 
+        width: 100%;
+        @include fallback('height', 3*$font-size, 3em);
+        z-index: 999;
+        position: relative;
+        @include fallback('margin-top', -3*$font-size, -3em);
+        * {
+            display: block;
+            height: 85%;
+            color:#d1d1d1;
+            * {
+                height: 100%;
+            }
+            
+        }
+        .timeInfo {
+            @include vertical-align(middle);
+        }
+        .volume {
+            height: 100%;
+            width: 10em;
+            .range_slider {
+                height: 30% !important;
+            }
+        }
+        .volume::before, .volume::after {
+            display: block;
+            content: "";
+            height: 35%;
+        }
+        
+        .playbutton, .fullscreen {
+            cursor: pointer;
+        }
+        .seekbar {
+            height: 15%;
+            .range_slider {
+                height: 100% !important;
+            }
+        }
+        .left {
+            float: left;
+        }
+        .right {
+            float: right;
+        }
+        .right::after, .left::after {
+            clear: both;
+        }
+    }
+}
