@@ -44,7 +44,7 @@ window.SlimPlayer = (function(){
         videoNode.addEventListener('timeupdate', TimeUpdateHandler);
         videoNode.addEventListener('buffer', BufferProgressHandler);
         var nextSibling = videoNode.nextElementSibling;
-        var parent = videoNode.parentElement;
+        var parent = videoNode.parentNode;
         var playerWrapper = CreateElement("slimplayer-wrapper");
         playerWrapper.appendChild(videoNode);
         parent.insertBefore(playerWrapper, nextSibling);
@@ -80,8 +80,13 @@ window.SlimPlayer = (function(){
         var volumeSlider = CreateElement("range_slider");
         mainTrack = CreateElement();
         mainTrack.setAttribute("main", 1);
-        volumeSlider.setAttribute("initial", 50);
+        var volumeValue = (sessionStorage && 'volume' in sessionStorage) ? sessionStorage.volume : 1;
+        volumeSlider.setAttribute("initial", volumeValue * 100);
+        pe.Player.volume = volumeValue;
         volumeSlider.appendChild(mainTrack);
+        volumeSlider.addEventListener('sliderProgressChanged', VolumeHandler);
+        volumeSlider.addEventListener('sliderSeek', VolumeHandler);
+        volumeSlider.addEventListener('sliderSeekEnd', VolumeChangedHandler);
         pe.VolumeSlider = SlimSlidy.CreateSliderFromElement(volumeSlider);
         volume.appendChild(volumeSlider);
         right.appendChild(volume);
@@ -128,7 +133,7 @@ window.SlimPlayer = (function(){
     }
 
     function FullScreenHandler() {
-        var player = this.parentElement.parentElement.previousElementSibling;
+        var player = this.parentNode.parentNode.previousElementSibling;
         if (player.requestFullscreen) {
             player.requestFullscreen();
         } else if (player.mozRequestFullScreen) {
@@ -183,8 +188,8 @@ window.SlimPlayer = (function(){
     }
 
     function TimeUpdateHandler() {
-        var timeSpan = this.parentElement.getElementsByClassName("timeInfo")[0];
-        var seekbar = this.parentElement.getElementsByClassName("seekbar")[0].getElementsByClassName("range_slider")[0];
+        var timeSpan = this.parentNode.getElementsByClassName("timeInfo")[0];
+        var seekbar = this.parentNode.getElementsByClassName("seekbar")[0].getElementsByClassName("range_slider")[0];
         
         SlimSlidy.GetSliderFromElement(seekbar).SetCurrent(0, this.currentTime/this.duration);
         timeSpan.innerText = getTimeString(this.currentTime)+'/'+getTimeString(this.duration);
@@ -200,7 +205,7 @@ window.SlimPlayer = (function(){
     }
 
     function BufferProgressHandler() {
-        var seekbar = this.parentElement.getElementsByClassName("seekbar")[0].getElementsByClassName("range_slider")[0];
+        var seekbar = this.parentNode.getElementsByClassName("seekbar")[0].getElementsByClassName("range_slider")[0];
         var endOfBuffer = GetBufferEnd(this);
         
         SlimSlidy.GetSliderFromElement(seekbar).SetCurrent(1, endOfBuffer / this.duration);
@@ -208,15 +213,13 @@ window.SlimPlayer = (function(){
 
     function SliderProgressHandler(e, obj) {
         obj = obj || this;
-        var player = obj.parentElement.parentElement.previousElementSibling;
+        var player = obj.parentNode.parentNode.previousElementSibling;
         if(obj && obj !== this){player.pause();}
         player.currentTime = e.detail.current * player.duration / 100;
     }
 
     function SeekStartHandler(e){
-        var player = obj.parentElement.parentElement.previousElementSibling;
         seekPaused = true;
-        fallbackTime = player.currentTime;
         SliderProgressHandler(e, this);
     }
 
@@ -224,10 +227,22 @@ window.SlimPlayer = (function(){
         if(seekPaused) {
             seekPaused = false;
         }
-        var player = this.parentElement.parentElement.previousElementSibling;
+        var player = this.parentNode.parentNode.previousElementSibling;
         var seekevt = new CustomEvent('SlimPlayerSeek', {detail: player.currentTime});
         player.dispatchEvent(seekevt);
 
+    }
+
+    function VolumeHandler(e) {
+        var player = this.parentNode.parentNode.parentNode.previousElementSibling;
+        player.volume = e.detail.current / 100;
+    }
+
+    function VolumeChangedHandler() {
+        if(sessionStorage) {
+            var player = this.parentNode.parentNode.parentNode.previousElementSibling;
+            sessionStorage.setItem('volume', player.volume);
+        }
     }
 
     function GetPlayerFromElement(elem) {
