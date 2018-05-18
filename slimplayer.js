@@ -2,7 +2,6 @@ window.SlimPlayer = (function(){
     var seekPaused = false;
     var playPathD = 'M10,10 25,18 20,18 10,18 Z M10,18 20,18 25,18 10,26 Z';
     var pausePathD = 'M10,25 10,10 15,10 15,25 Z M17,25 17,10 22,10 22,25 Z';
-    var controlEnabled = true;
     var players = [];
     function PlayerElements() {
         var _controlEnabled = true;
@@ -27,14 +26,21 @@ window.SlimPlayer = (function(){
         }
     };
 
-    document.addEventListener("DOMContentLoaded", function(){
+    function AutoCreatePlayers() {
         var elements = document.getElementsByClassName("SlimPlayer");
         for (let i = 0; i < elements.length; i++) {
             if(elements[i].tagName === "VIDEO") {
                 ConstructPlayer(elements[i]);
             }
         }
-    });
+    }
+
+    function CreatePlayerFromElement(element) {
+        if(element.tagName === "VIDEO") {
+            return ConstructPlayer(element);
+        }
+        return null;
+    }
 
     function ConstructPlayer(videoNode) {
         var pe = new PlayerElements();
@@ -102,6 +108,19 @@ window.SlimPlayer = (function(){
         var conrEvt = new CustomEvent("playerConstructionDone");
         document.dispatchEvent(conrEvt);
         players.push(pe);
+        return pe;
+    }
+
+    function DestroyPlayer(playerObject, hard = false) {
+        var index = players.indexOf(playerObject);
+        if(index > -1) {
+            var wrapper = playerObject.Player.parentNode;
+            if(!hard) {
+                wrapper.parentNode.insertBefore(playerObject.Player, wrapper);
+            }
+            wrapper.parentNode.removeChild(wrapper);
+            players.splice(index, 1);
+        }
     }
 
     function CreateElement(cls="", type="div"){
@@ -144,6 +163,7 @@ window.SlimPlayer = (function(){
     }
 
     function getTimeString(time) {
+        time = (isNaN(time)) ? 0 : time;
         time = Math.round(time);
         var minutes = Math.floor(time / 60);
         var seconds = time % 60;
@@ -169,7 +189,7 @@ window.SlimPlayer = (function(){
     }
 
     function PlayPauseHandler() {
-        var player = this.parentNode.parentNode.getElementsByClassName('SlimPlayer')[0];
+        var player = this.parentNode.parentNode.getElementsByTagName('video')[0];
         if(player.paused) {
             player.play();
         }
@@ -259,6 +279,9 @@ window.SlimPlayer = (function(){
     }
 
     return {
+        AutoCreatePlayers: AutoCreatePlayers,
+        CreatePlayerFromElement: CreatePlayerFromElement,
+        DestroyPlayer: DestroyPlayer,
         GetPlayerFromElement: GetPlayerFromElement,
         GetFirstPlayer: GetFirstPlayer
     }
